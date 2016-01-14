@@ -4,7 +4,8 @@
 ROADMAP
 -------
 1. Create a basic working SDK (wrapping volley)
-2. Create useful memory caches (android cache, base64'ed settings)
+2. Write Unit tests
+3. Create useful memory caches (android cache, base64'ed settings)
 
 iOS support
 -----------
