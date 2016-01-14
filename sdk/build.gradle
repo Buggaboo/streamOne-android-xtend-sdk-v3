@@ -1,0 +1,65 @@
+buildscript {scriptHandler->
+    apply from: '../repositories.gradle', to: scriptHandler
+    apply from: '../dependencies.gradle'
+    dependencies {
+        classpath(project.ext.build.android_gradle)
+        classpath(project.ext.build.xtend_android_gradle)
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+apply plugin: 'com.android.library'
+apply plugin: "org.xtext.android.xtend"
+apply from: '../dependencies.gradle'
+
+dependencies {
+    compile(project.ext.lib.android.support_v4)
+    compile(project.ext.lib.android.appcompat_v7)
+    compile(project.ext.lib.xtend)
+
+    // testing, TODO refactor out standard testing deps
+    androidTestCompile 'com.android.support:support-annotations:23.1.1'
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    androidTestCompile 'com.android.support.test:rules:0.4.1'
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.1'
+
+    testCompile "junit:junit:+"
+}
+
+android {
+    compileSdkVersion(project.ext.compileSdkVersion)
+    buildToolsVersion(project.ext.buildToolsVersion)
+/*
+    sourceSets {
+        main {
+            manifest{ srcFile 'AndroidManifest.xml' }
+            java.srcDirs += ['src']
+            res.srcDirs += ['res']
+            assets.srcDirs += ['assets']
+            resources.srcDirs += ['src']
+            aidl.srcDirs += ['src']
+        }
+    }
+*/
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+
