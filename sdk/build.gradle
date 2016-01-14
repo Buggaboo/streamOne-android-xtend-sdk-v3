@@ -20,6 +20,9 @@ dependencies {
     compile(project.ext.lib.android.appcompat_v7)
     compile(project.ext.lib.xtend)
 
+    // xtendroid support
+    compile 'com.github.tobykurien:xtendroid:0.12.1'
+
     // testing, TODO refactor out standard testing deps
     androidTestCompile 'com.android.support:support-annotations:23.1.1'
     androidTestCompile 'com.android.support.test:runner:0.4.1'
