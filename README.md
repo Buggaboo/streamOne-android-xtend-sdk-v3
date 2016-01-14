@@ -1,4 +1,4 @@
-# streamOne-android-xtend-sdk-v3
+# StreamOne android sdk v3
 [StreamOne platform sdk](http://www.streamone.nl/) for android written in Xtend, transpiled to java
 
 ROADMAP
