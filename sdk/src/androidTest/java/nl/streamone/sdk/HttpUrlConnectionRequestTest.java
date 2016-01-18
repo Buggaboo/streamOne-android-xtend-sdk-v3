@@ -14,60 +14,10 @@ import static org.junit.Assert.fail;
  */
 public class HttpUrlConnectionRequestTest {
 
-    public String getSignature()
-    {
-        /**
-         protected function signature()                                                                                 │fatal: Could not read from remote repository.
-         {                                                                                                              │
-         $parameters = $this->parametersForSigning();                                                           │Please make sure you have the correct access rights
-         $path = $this->path();                                                                                 │and the repository exists.
-         $arguments = $this->arguments();                                                                       │128 (M=2c5aa) jasmsison@JASMS_MBP ~/Documents/git-repositories/streamOne-android-xtend-sdk-v3> git push
-         │Counting objects: 19, done.
-         // Calculate signature                                                                                 │Delta compression using up to 8 threads.
-         $url = $path . '?' . http_build_query($parameters) . '&' . http_build_query($arguments);               │Compressing objects: 100% (11/11), done.
-         $key = $this->signingKey();                                                                            │Writing objects: 100% (19/19), 3.67 KiB | 0 bytes/s, done.
-         │Total 19 (delta 5), reused 0 (delta 0)
-         return hash_hmac('sha1', $url, $key);                                                                  │To git@github.com:Buggaboo/streamOne-android-xtend-sdk-v3.git
-         }
-         */
-    }
-
-
-    /**
-     1. http://api.nicky.test/api/application/view?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=fdcb6fa43769bc7729e4e6df1ed0cb99ffcd8572
-     POST /api/application/view?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=fdcb6fa43769bc7729e4e6df1ed0cb99ffcd8572 HTTP/1.0
-     Host: api.nicky.test
-     Content-Length: 31
-     Content-Type: application/x-www-form-urlencoded
-
-     application=APPLICATION&limit=3
-
-     2. http://api.nicky.test/api/session/initialize?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=4fefaf20807f55839425fe217507a30cc4d3dea9
-     POST /api/session/initialize?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=4fefaf20807f55839425fe217507a30cc4d3dea9 HTTP/1.0
-     Host: api.nicky.test
-     Content-Length: 26
-     Content-Type: application/x-www-form-urlencoded
-
-     user=user&userip=127.0.0.2
-
-     3. http://api.nicky.test/api/session/create?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=b4cddd93cdb0e46fe8e992d578bc60f82fb3c95e
-     POST /api/session/create?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=b4cddd93cdb0e46fe8e992d578bc60f82fb3c95e HTTP/1.0
-     Host: api.nicky.test
-     Content-Length: 132
-     Content-Type: application/x-www-form-urlencoded
-
-     challenge=coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6&response=HQtJEAcGEwAASEJTUx0GRQYKRAACUQ8YD0BdXlVZVC90TBwgdhBlLm9RA1R5N0AFW25wUVMNHHpeY1QD
-
-     4. http://api.nicky.test/api/user/viewme?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&session=sC5tGogRgBow&signature=0760294b553bae59d798b2df03e66082b6699506
-     POST /api/user/viewme?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&session=sC5tGogRgBow&signature=0760294b553bae59d798b2df03e66082b6699506 HTTP/1.0
-     Host: api.nicky.test
-     Content-Type: application/x-www-form-urlencoded
-
-     */
-
     final private static String hostName = "localhost:6969";
     final private static String user = "user";
     final private static String psk = "AAAAABBBBBCCCCCDDDDD000000111111222222";
+    final private static String actorId = "user"; // TODO add this to the Requests
 
     @Test
     public void openApplicationSession()

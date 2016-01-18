@@ -51,13 +51,16 @@ abstract class Response
 abstract class RequestBase
 {
     @Accessors
-    public String psk
+    String actorId
 
     @Accessors
-    public String command
+    String psk
 
     @Accessors
-    public String action
+    String command
+
+    @Accessors
+    String action
 
     /**
         Path data
@@ -85,9 +88,9 @@ abstract class RequestBase
     {
      protected function signature()                                                                                 │fatal: Could not read from remote repository.
      {                                                                                                              │
-     $parameters = $this->parametersForSigning();                                                           │Please make sure you have the correct access rights
+     $parameters = $this->parametersForSigning();
      $path = $this->path();                                                                                 │and the repository exists.
-     $arguments = $this->arguments();                                                                       │128 (M=2c5aa) jasmsison@JASMS_MBP ~/Documents/git-repositories/streamOne-android-xtend-sdk-v3> git push
+     $arguments = $this->arguments();                                                                       │128 (M=2c5aa)
      │Counting objects: 19, done.
      // Calculate signature                                                                                 │Delta compression using up to 8 threads.
      $url = $path . '?' . http_build_query($parameters) . '&' . http_build_query($arguments);               │Compressing objects: 100% (11/11), done.
@@ -95,6 +98,26 @@ abstract class RequestBase
      │Total 19 (delta 5), reused 0 (delta 0)
      return hash_hmac('sha1', $url, $key);                                                                  │To git@github.com:Buggaboo/streamOne-android-xtend-sdk-v3.git
      }
+
+      protected function parametersForSigning()                                                                      │:100644 100644 eb88248... e5dc48b... M  sdk/src/main/java/nl/streamone/sdk/Request.xtend
+        {                                                                                                              │
+                $parameters = parent::parametersForSigning();                                                          │commit 2c5aaf55d2ae949cc374bcd6e40b4dae802e9d01
+
+                // Set actor ID parameter                                                                              │Date:   Mon Jan 18 15:50:14 2016 +0100
+                $actor_id = $this->config->getAuthenticationActorId();                                                 │
+                switch ($this->config->getAuthenticationType())                                                        │    Added unit test for user session creation
+                {                                                                                                      │
+                        case Config::AUTH_USER:                                                                        │:100644 100644 45aaeda... dd28b6f... M  .gitignore
+                                $parameters['user'] = $actor_id;                                                       │:100644 100644 7966aa7... 7c79303... M  sdk/build.gradle
+                                break;                                                                                 │:100644 100644 2444970... 7a4ec76... M  sdk/src/androidTest/java/nl/streamone/sdk/ApplicationTest.java
+                                                                                                                       │:000000 100644 0000000... b5ce4af... A  sdk/src/main/java/nl/streamone/sdk/Platform.xtend
+                        case Config::AUTH_APPLICATION:                                                                 │:100644 100644 3e17c04... eb88248... M  sdk/src/main/java/nl/streamone/sdk/Request.xtend
+                                $parameters['application'] = $actor_id;                                                │
+                                break;                                                                                 │commit c099c2b9e6038a4a8e8fa83d0fd37ac97940477e
+                }
+                                                                                                                       │Date:   Fri Jan 15 16:25:40 2016 +0100
+                return $parameters;                                                                                    │
+        }
      */
 
 
@@ -176,9 +199,9 @@ class HttpUrlConnectionRequest extends RequestBase
             builder.appendQueryParameter(p.key, p.value)
         }
 
+        // TODO do something about the actorId
         val signaturePathAndQueryUrl = new URL(builder.build.toString)
 
-        // TODO I know, duplication, see the '&'
         val argBuilder = new StringBuilder
         if (!arguments.isEmpty)
         {
@@ -193,15 +216,12 @@ class HttpUrlConnectionRequest extends RequestBase
         val signaturePathAndQuery = concat(signaturePathAndQueryUrl.path, '?', signaturePathAndQueryUrl.query, args).toString
 
         try {
-            builder.appendQueryParameter("signature", getHmacSha1(signaturePathAndQuery))
+            builder.appendQueryParameter("signature", signaturePathAndQuery.getHmacSha1)
         }catch(UnsupportedEncodingException e) {
-            // badly formed psk
             response.onLostConnection(this as RequestBase, e)
         }catch(NoSuchAlgorithmException e) {
-            // badly formed psk
             response.onLostConnection(this as RequestBase, e)
         }catch(InvalidKeyException e) {
-            // badly formed psk
             response.onLostConnection(this as RequestBase, e)
         }
 
