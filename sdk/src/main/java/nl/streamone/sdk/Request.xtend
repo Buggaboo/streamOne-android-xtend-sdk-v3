@@ -22,8 +22,32 @@ import org.eclipse.xtend.lib.annotations.Accessors
 import java.util.Map
 import java.util.List
 
+import org.xtendroid.parcel.AndroidParcelable
+import org.xtendroid.annotations.EnumProperty
+import org.eclipse.xtend.lib.annotations.Accessors
+
 import nl.streamone.sdk.RequestBase
 
+@Accessors
+@AndroidParcelable
+class Authentication {
+    String url
+
+    @EnumProperty(name="AuthTypeEnum", values=#["user", "application"])
+    String authenticationType
+
+    String userId
+    String userPsk
+    String defaultAccountId
+
+    new (String url, AuthTypeEnum authenticationType, String userId, String userPsk, String defaultAccountId) {
+            this.url = url
+            this.authenticationType = authenticationType.toString
+            this.userId = userId
+            this.userPsk = userPsk
+            this.defaultAccountId = defaultAccountId
+    }
+}
 
 abstract class Response
 {
