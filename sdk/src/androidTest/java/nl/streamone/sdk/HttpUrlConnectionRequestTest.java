@@ -9,6 +9,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import nl.streamone.sdk.Authentication;
+
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
@@ -18,6 +20,8 @@ public class HttpUrlConnectionRequestTest {
     final private static String user = "user";
     final private static String psk = "AAAAABBBBBCCCCCDDDDD000000111111222222";
     final private static String actorId = "user"; // TODO add this to the Requests
+
+    final private static Authentication auth = new Authentication(hostname, user, psk, actorId);
 
     @Test
     public void openApplicationSession()
@@ -32,11 +36,9 @@ public class HttpUrlConnectionRequestTest {
 
          application=APPLICATION&limit=3
          */
-        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest();
+        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(auth);
 
         // TODO chain this mofo
-        connReq.setPsk(psk);
-        connReq.setHostname(hostName); // see src/javascript/streamone_mock_server.js
         connReq.setCommand("application");
         connReq.setAction("view");
 
@@ -112,10 +114,9 @@ public class HttpUrlConnectionRequestTest {
          user=user&userip=127.0.0.2
          */
 
-        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest();
+        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(auth);
 
         // TODO chain this mofo
-        connReq.setHostname(hostName); // see src/javascript/streamone_mock_server.js
         connReq.setCommand("session");
         connReq.setAction("initialize");
 
@@ -177,10 +178,9 @@ public class HttpUrlConnectionRequestTest {
 
          challenge=coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6&response=HQtJEAcGEwAASEJTUx0GRQYKRAACUQ8YD0BdXlVZVC90TBwgdhBlLm9RA1R5N0AFW25wUVMNHHpeY1QD
          */
-        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest();
+        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(auth);
 
         // TODO chain this mofo
-        connReq.setHostname(hostName); // see src/javascript/streamone_mock_server.js
         connReq.setCommand("session");
         connReq.setAction("create");
 
@@ -239,7 +239,7 @@ public class HttpUrlConnectionRequestTest {
          Host: api.nicky.test
          Content-Type: application/x-www-form-urlencoded
          */
-        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest();
+        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(auth);
 
         // TODO chain this mofo
         connReq.setHostname(hostName); // see src/javascript/streamone_mock_server.js

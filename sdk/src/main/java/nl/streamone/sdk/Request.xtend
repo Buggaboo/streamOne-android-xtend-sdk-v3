@@ -27,11 +27,12 @@ import org.xtendroid.annotations.EnumProperty
 import org.eclipse.xtend.lib.annotations.Accessors
 
 import nl.streamone.sdk.RequestBase
+import nl.streamone.sdk.Authentication
 
 @Accessors
 @AndroidParcelable
 class Authentication {
-    String url
+    String hostname
 
     @EnumProperty(name="AuthTypeEnum", values=#["user", "application"])
     String authenticationType
@@ -40,8 +41,8 @@ class Authentication {
     String userPsk
     String defaultAccountId
 
-    new (String url, AuthTypeEnum authenticationType, String userId, String userPsk, String defaultAccountId) {
-            this.url = url
+    new (String hostname, AuthTypeEnum authenticationType, String userId, String userPsk, String defaultAccountId) {
+            this.hostname = hostname
             this.authenticationType = authenticationType.toString
             this.userId = userId
             this.userPsk = userPsk
@@ -75,10 +76,7 @@ abstract class Response
 abstract class RequestBase
 {
     @Accessors
-    String actorId
-
-    @Accessors
-    String psk
+    Authentication auth
 
     @Accessors
     String command
@@ -170,7 +168,7 @@ abstract class RequestBase
         UnsupportedEncodingException, NoSuchAlgorithmException,
         InvalidKeyException
     {
-        val key = new SecretKeySpec((psk).getBytes("UTF-8"), "HmacSHA1");
+        val key = new SecretKeySpec((auth.userPsk).getBytes("UTF-8"), "HmacSHA1");
         val mac = Mac.getInstance("HmacSHA1");
         mac.init(key);
 
@@ -204,7 +202,14 @@ abstract class RequestBase
 
 class HttpUrlConnectionRequest extends RequestBase
 {
-    new () { super() }
+    new () {
+        super()
+    }
+
+    new (Authentication auth) {
+        super()
+        this.auth = auth
+    }
 
     public override execute(Response response)
     {
