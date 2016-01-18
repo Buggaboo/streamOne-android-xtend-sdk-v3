@@ -36,6 +36,10 @@ dependencies {
 android {
     compileSdkVersion(project.ext.compileSdkVersion)
     buildToolsVersion(project.ext.buildToolsVersion)
+
+    defaultConfig {
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
 /*
     sourceSets {
         main {

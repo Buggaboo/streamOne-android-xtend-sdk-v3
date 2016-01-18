@@ -30,3 +30,4 @@ proguard/
 .project
 .idea
 *.iml
+*.bak
