@@ -37,16 +37,17 @@ class Authentication {
     @EnumProperty(name="AuthTypeEnum", values=#["user", "application"])
     String authenticationType
 
-    String userId
-    String userPsk
-    String defaultAccountId
+    String loginId
+    String preSharedKey
 
-    new (String hostname, AuthTypeEnum authenticationType, String userId, String userPsk, String defaultAccountId) {
+    //String defaultAccountId // TODO determine wtf this is for
+
+    new (String hostname, AuthTypeEnum authenticationType, String loginId, String preSharedKey/*, String defaultAccountId*/) {
             this.hostname = hostname
             this.authenticationType = authenticationType.toString
-            this.userId = userId
-            this.userPsk = userPsk
-            this.defaultAccountId = defaultAccountId
+            this.loginId = loginId
+            this.preSharedKey = preSharedKey
+            //this.defaultAccountId = defaultAccountId
     }
 }
 
@@ -95,9 +96,6 @@ abstract class RequestBase
 
     @Accessors
     protected String scheme = 'https'
-
-    @Accessors
-    protected String hostname
 
     @Accessors
     protected String method = 'POST'
@@ -168,7 +166,7 @@ abstract class RequestBase
         UnsupportedEncodingException, NoSuchAlgorithmException,
         InvalidKeyException
     {
-        val key = new SecretKeySpec((auth.userPsk).getBytes("UTF-8"), "HmacSHA1");
+        val key = new SecretKeySpec((auth.preSharedKey).getBytes("UTF-8"), "HmacSHA1");
         val mac = Mac.getInstance("HmacSHA1");
         mac.init(key);
 
@@ -215,7 +213,7 @@ class HttpUrlConnectionRequest extends RequestBase
     {
         val builder = new Uri.Builder()
         builder.scheme(scheme)
-        .authority(hostname)
+        .authority(auth.hostname)
         .appendPath('api')
         .appendPath(command)
         .appendPath(action)
@@ -228,7 +226,9 @@ class HttpUrlConnectionRequest extends RequestBase
             builder.appendQueryParameter(p.key, p.value)
         }
 
-        // TODO do something about the actorId
+        // TODO add builder methods to explicitly add the parameters
+        // necessary for either application or user authentication
+        // the PHP version has a very convoluted way of doing this
         val signaturePathAndQueryUrl = new URL(builder.build.toString)
 
         val argBuilder = new StringBuilder
