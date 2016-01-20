@@ -165,6 +165,20 @@ public class HttpUrlConnectionRequestTest {
         });
     }
 
+    /**
+     * How to get the response:
+     *
+     *
+     * public static function generatePasswordResponse($password, $salt, $challenge)
+     {
+     $password_hash = crypt(md5($password), $salt);
+     $sha_password_hash = hash('sha256', $password_hash);
+     $password_hash_with_challenge = hash('sha256', $sha_password_hash . $challenge);
+     return base64_encode($password_hash_with_challenge ^ $password_hash);
+     }
+
+     $password_hash --> "The new password hash for this user, should be calculated as sha56(blowfish(md5(password), salt)), where password is the new password of the user"
+     */
     @Test
     public void createUserSession()
     {
@@ -192,6 +206,7 @@ public class HttpUrlConnectionRequestTest {
         // TODO chain this mofo
         Map<String, String> args = connReq.getArguments();
         args.put("challenge", ...);
+        args.put("response", ...);
 
         connReq.execute(new Response() {
 
