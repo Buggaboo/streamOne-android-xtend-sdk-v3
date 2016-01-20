@@ -71,7 +71,8 @@ class Cryptography
             val yint = y.get(i) as int
 
             //x.set(i, x.get(i).bitwiseXor(y.get(i)))
-            x.set(i, xint.bitwiseXor(yint) as byte) // will endianness fuck up this cast?
+            x.set(i, xint.bitwiseXor(yint).bitwiseAnd(0xff) as byte)
+            // will endianness fuck up this cast? bitwiseAnding with 0xff removes the signedness
         }
 
         // TODO nullify byte[], security

@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import nl.streamone.sdk.Authentication;
+import nl.streamone.sdk.Cryptography;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
@@ -206,7 +207,7 @@ public class HttpUrlConnectionRequestTest {
         // TODO chain this mofo
         Map<String, String> args = connReq.getArguments();
         args.put("challenge", ...);
-        args.put("response", ...);
+        args.put("response", Cryptography.getChallengeResponse(password.getBytes(), challenge.getBytes(), salt.getBytes()));
 
         connReq.execute(new Response() {
 
@@ -257,7 +258,6 @@ public class HttpUrlConnectionRequestTest {
         HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(auth);
 
         // TODO chain this mofo
-        connReq.setHostname(hostName); // see src/javascript/streamone_mock_server.js
         connReq.setCommand("user");
         connReq.setAction("viewme");
 
