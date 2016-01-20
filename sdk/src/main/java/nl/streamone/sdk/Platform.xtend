@@ -1,13 +1,105 @@
 package nl.streamone.sdk
 
+import java.util.Date
 import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 import android.util.Base64
 
+import org.xtendroid.parcel.AndroidParcelable
+import org.xtendroid.json.AndroidJson
+import org.xtendroid.annotations.EnumProperty
+
 /**
  * Created by jasmsison on 15/01/16.
  */
+
+@AndroidParcelable
+@AndroidJson
+class Authentication {
+    String hostname
+
+    @EnumProperty(name="AuthTypeEnum", values=#["user", "application"])
+    String authenticationType
+
+    String loginId
+    String preSharedKey
+
+    //String defaultAccountId // TODO determine wtf this is for
+/*
+    // TODO determine what the defaultUserId is for...
+    new (String hostname, AuthTypeEnum authenticationType, String loginId, String preSharedKey) {
+        this.hostname = hostname
+        this.authenticationType = authenticationType.toString
+        this.loginId = loginId
+        this.preSharedKey = preSharedKey
+        //this.defaultAccountId = defaultAccountId
+    }
+*/
+}
+
+@AndroidParcelable
+@AndroidJson
+class ApplicationAuthentication {
+/**
+     "body": [{
+     "id": "APPLICATION",
+     "name": "Application Title",
+     "description": "Application Description",
+     "datecreated": "2015-09-28 09:00:02",
+     "datemodified": "2015-09-28 09:00:02",
+     "active": true,
+     "iplock": null,
+     "timezone": "Europe\/Amsterdam"
+     }]
+ */
+    String  id
+    String  name
+    String  description
+    Date    datecreated
+    Date    datemodified
+    boolean active
+    // boolean iplock
+    String  timezone
+}
+
+@AndroidParcelable
+@AndroidJson
+class InitializeAuthentication {
+    /**
+         "challenge": "coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6",
+         "salt": "$2y$12$baztaaydu13s4ah6y6pegt",
+         "needsv2hash": false
+     */
+    String challenge
+    String salt
+    boolean needsv2hash
+}
+
+@AndroidParcelable
+@AndroidJson
+class InitializeSession {
+    /*
+    "id": "sC5tGogRgBow",
+    "key": "gR92jURda7mEqiDzhcz2bC1FtIzS8wxe",
+    "timeout": 3600,
+    "user": "USER"
+    */
+    String id
+    String key
+    int timeout
+    String user
+}
+
+
+
+@AndroidParcelable
+@AndroidJson
+class UserAuthentication {
+
+}
+
+
 
 class Cryptography
 {
@@ -85,6 +177,7 @@ class Cryptography
      */
     static def String getBase64Encoding(byte[] b)
     {
+        // Base64 is an android thing
         var flags = Base64.URL_SAFE.bitwiseOr(Base64.NO_PADDING).bitwiseOr(Base64.NO_WRAP)
         return Base64.encodeToString(b, flags)
     }

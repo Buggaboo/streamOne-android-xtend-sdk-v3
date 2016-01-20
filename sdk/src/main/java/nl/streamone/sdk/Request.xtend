@@ -20,34 +20,9 @@ import java.io.BufferedReader
 import java.util.Map
 import java.util.List
 
-import org.xtendroid.parcel.AndroidParcelable
-import org.xtendroid.annotations.EnumProperty
 import org.eclipse.xtend.lib.annotations.Accessors
 
 import nl.streamone.sdk.RequestBase
-import nl.streamone.sdk.Authentication
-
-@Accessors
-@AndroidParcelable
-class Authentication {
-    String hostname
-
-    @EnumProperty(name="AuthTypeEnum", values=#["user", "application"])
-    String authenticationType
-
-    String loginId
-    String preSharedKey
-
-    //String defaultAccountId // TODO determine wtf this is for
-
-    new (String hostname, AuthTypeEnum authenticationType, String loginId, String preSharedKey/*, String defaultAccountId*/) {
-            this.hostname = hostname
-            this.authenticationType = authenticationType.toString
-            this.loginId = loginId
-            this.preSharedKey = preSharedKey
-            //this.defaultAccountId = defaultAccountId
-    }
-}
 
 abstract class Response
 {
@@ -75,13 +50,17 @@ abstract class Response
 abstract class RequestBase
 {
     @Accessors
-    Authentication auth
-
-    @Accessors
     String command
 
     @Accessors
     String action
+
+    /**
+        For application authentication we only require the psk here.
+        For session authentication we need (psk + post-application-authentication-key)
+     */
+    @Accessors
+    String signingKey
 
     /**
         Path data
@@ -160,21 +139,22 @@ abstract class RequestBase
     */
 
 
-    def String getHmacSha1(String input) throws
+    static def String getHmacSha1(byte[] key, byte[] input) throws
         UnsupportedEncodingException, NoSuchAlgorithmException,
         InvalidKeyException
     {
-        val key = new SecretKeySpec((auth.preSharedKey).getBytes("UTF-8"), "HmacSHA1")
+        val cryptoKey = new SecretKeySpec(key, "HmacSHA1")
         val mac = Mac.getInstance("HmacSHA1")
-        mac.init(key)
+        mac.init(cryptoKey)
 
-        val bytes = mac.doFinal(input.getBytes("UTF-8"))
+        val encrypted = mac.doFinal(input)
 
         // convert to hex (just like php expects)
         val buffer = new StringBuffer
-        for(var index = 0; index < bytes.length; index++) {
-        //for (var index : 0...bytes.length) { // TODO is this legal syntax
-            buffer.append(Integer.toHexString(bytes.get(index)))
+        for(var index = 0; index < encrypted.length; index++) {
+        //for (var index : 0...bytes.length) {
+        // TODO is this legal syntax, KISS http://stackoverflow.com/questions/12126999/xtend-for-loop-support-and-adding-range-support
+            buffer.append(Integer.toHexString(encrypted.get(index)))
         }
 
         return buffer.toString
@@ -199,20 +179,27 @@ abstract class RequestBase
 
 class HttpUrlConnectionRequest extends RequestBase
 {
+    @Accessors
+    String hostname
+
     new () {
         super()
     }
 
-    new (Authentication auth) {
+    new (String hostname) {
         super()
-        this.auth = auth
     }
 
     public override execute(Response response)
     {
+        if (signingKey == null)
+        {
+            throw new IllegalArgumentException("You must provide a signing key.")
+        }
+
         val builder = new Uri.Builder()
         builder.scheme(scheme)
-        .authority(auth.hostname)
+        .authority(hostname)
         .appendPath('api')
         .appendPath(command)
         .appendPath(action)
@@ -244,7 +231,7 @@ class HttpUrlConnectionRequest extends RequestBase
         val signaturePathAndQuery = concat(signaturePathAndQueryUrl.path, '?', signaturePathAndQueryUrl.query, args).toString
 
         try {
-            builder.appendQueryParameter("signature", signaturePathAndQuery.getHmacSha1)
+            builder.appendQueryParameter("signature", getHmacSha1(signingKey.bytes, signaturePathAndQuery.bytes))
         }catch(UnsupportedEncodingException e) {
             response.onLostConnection(this as RequestBase, e)
         }catch(NoSuchAlgorithmException e) {

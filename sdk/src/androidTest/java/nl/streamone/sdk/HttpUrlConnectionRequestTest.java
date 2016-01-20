@@ -12,6 +12,11 @@ import static org.junit.Assert.fail;
 import nl.streamone.sdk.Authentication;
 import nl.streamone.sdk.Cryptography;
 
+import org.xtendroid.parcel.AndroidParcelable;
+import org.xtendroid.annotations.EnumProperty;
+import org.eclipse.xtend.lib.annotations.Accessors;
+
+
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
@@ -22,7 +27,7 @@ public class HttpUrlConnectionRequestTest {
     final private static String psk = "AAAAABBBBBCCCCCDDDDD000000111111222222";
     final private static String actorId = "user"; // TODO add this to the Requests
 
-    final private static Authentication auth = new Authentication(hostname, user, psk, actorId);
+    final private static Authentication auth = new Authentication(hostName, AuthTypeEnum.toAuthTypeEnumValue("application"), user, psk);
 
     @Test
     public void openApplicationSession()
@@ -37,11 +42,13 @@ public class HttpUrlConnectionRequestTest {
 
          application=APPLICATION&limit=3
          */
-        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(auth);
+        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(hostName);
 
         // TODO chain this mofo
         connReq.setCommand("application");
         connReq.setAction("view");
+
+        connReq.setSigningKey(psk);
 
         // TODO chain this mofo
         Map<String, String> params = connReq.getParameters();
@@ -115,11 +122,13 @@ public class HttpUrlConnectionRequestTest {
          user=user&userip=127.0.0.2
          */
 
-        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(auth);
+        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(hostName);
 
         // TODO chain this mofo
         connReq.setCommand("session");
         connReq.setAction("initialize");
+
+        connReq.setSigningKey(psk);
 
         // TODO chain this mofo
         Map<String, String> params = connReq.getParameters();
@@ -193,11 +202,13 @@ public class HttpUrlConnectionRequestTest {
 
          challenge=coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6&response=HQtJEAcGEwAASEJTUx0GRQYKRAACUQ8YD0BdXlVZVC90TBwgdhBlLm9RA1R5N0AFW25wUVMNHHpeY1QD
          */
-        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(auth);
+        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(hostName);
 
         // TODO chain this mofo
         connReq.setCommand("session");
         connReq.setAction("create");
+
+        connReq.setSigningKey(psk);
 
         // TODO chain this mofo
         Map<String, String> params = connReq.getParameters();
@@ -206,7 +217,9 @@ public class HttpUrlConnectionRequestTest {
 
         // TODO chain this mofo
         Map<String, String> args = connReq.getArguments();
-        args.put("challenge", ...);
+
+        // get these things from the JSON in getBody
+        args.put("challenge", challenge);
         args.put("response", Cryptography.getChallengeResponse(password.getBytes(), challenge.getBytes(), salt.getBytes()));
 
         connReq.execute(new Response() {
@@ -255,17 +268,18 @@ public class HttpUrlConnectionRequestTest {
          Host: api.nicky.test
          Content-Type: application/x-www-form-urlencoded
          */
-        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(auth);
+        HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(hostName);
 
         // TODO chain this mofo
         connReq.setCommand("user");
         connReq.setAction("viewme");
+        connReq.setSigningKey(psk + key);
 
         // TODO chain this mofo
         Map<String, String> params = connReq.getParameters();
         params.put("authentication_type", "application");
         params.put("application", "APPLICATION");
-        params.put("session", ...);
+        params.put("session", sessionId);
 
         connReq.execute(new Response() {
 
