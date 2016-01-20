@@ -17,8 +17,6 @@ import java.io.OutputStreamWriter
 import java.io.InputStreamReader
 import java.io.BufferedReader
 
-import org.eclipse.xtend.lib.annotations.Accessors
-
 import java.util.Map
 import java.util.List
 
