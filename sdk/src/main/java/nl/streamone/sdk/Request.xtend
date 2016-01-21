@@ -199,7 +199,7 @@ class HttpUrlConnectionRequest extends RequestBase
 
         val builder = new Uri.Builder()
         builder.scheme(scheme)
-        .authority(hostname)
+        .authority(hostname) // authority = hostname
         .appendPath('api')
         .appendPath(command)
         .appendPath(action)

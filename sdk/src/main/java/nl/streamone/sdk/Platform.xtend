@@ -9,13 +9,32 @@ import android.util.Base64
 import org.xtendroid.parcel.AndroidParcelable
 import org.xtendroid.json.AndroidJson
 import org.xtendroid.annotations.EnumProperty
+import org.eclipse.xtend.lib.annotations.Accessors
 
 /**
  * Created by jasmsison on 15/01/16.
  */
-
 @AndroidParcelable
 @AndroidJson
+class ResponseHeader
+{
+    /**
+     "status": 0,
+     "statusmessage": "OK",
+     "apiversion": 3,
+     "cacheable": true,
+     "count": 1,
+     "timezone": "Europe\/Amsterdam"
+     */
+    int status
+    String statusmessage
+    int apiversion
+    boolean cacheable
+    int count
+    String timezone
+}
+
+@AndroidParcelable
 class Authentication {
     String hostname
 
@@ -53,6 +72,9 @@ class ApplicationAuthentication {
      "timezone": "Europe\/Amsterdam"
      }]
  */
+    @AndroidJson("header")
+    ResponseHeader header
+
     String  id
     String  name
     String  description
@@ -65,7 +87,11 @@ class ApplicationAuthentication {
 
 @AndroidParcelable
 @AndroidJson
-class InitializeAuthentication {
+class PreSessionAuthentication {
+
+    @AndroidJson("header")
+    ResponseHeader header
+
     /**
          "challenge": "coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6",
          "salt": "$2y$12$baztaaydu13s4ah6y6pegt",
@@ -78,27 +104,27 @@ class InitializeAuthentication {
 
 @AndroidParcelable
 @AndroidJson
-class InitializeSession {
+class Session {
     /*
     "id": "sC5tGogRgBow",
     "key": "gR92jURda7mEqiDzhcz2bC1FtIzS8wxe",
     "timeout": 3600,
     "user": "USER"
     */
+    /**
+    Session token
+     */
     String id
+    /**
+    psk + key <= signing
+     */
     String key
     int timeout
     String user
+
+    @AndroidJson("header")
+    ResponseHeader header
 }
-
-
-
-@AndroidParcelable
-@AndroidJson
-class UserAuthentication {
-
-}
-
 
 
 class Cryptography
@@ -192,12 +218,12 @@ class Cryptography
 
     static def byte[] getMd5(byte[] b)
     {
-        return getDigest("SHA-1", b)
+        "SHA-1".getDigest(b)
     }
 
     static def byte[] getSha256(byte[] b)
     {
-        return getDigest("SHA-256", b)
+        "SHA-256".getDigest(b)
     }
 
     static def byte[] encryptWithBlowfish(byte[] secretKey, byte[] message)
