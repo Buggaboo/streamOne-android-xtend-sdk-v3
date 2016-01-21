@@ -18,6 +18,7 @@ import org.json.JSONObject
 
 /** 
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
+ * TODO test timeouts (max. 15m)
  */
 class HttpUrlConnectionRequestTest {
     final static String hostName = "localhost:6969"
