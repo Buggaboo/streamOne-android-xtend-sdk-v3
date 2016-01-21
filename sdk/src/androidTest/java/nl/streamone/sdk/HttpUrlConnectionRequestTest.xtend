@@ -23,6 +23,8 @@ class HttpUrlConnectionRequestTest {
     final static String user = "user"
     final static String psk = "AAAAABBBBBCCCCCDDDDD000000111111222222"
     final static String actorId = "user"
+    final static String password = "password"
+
     // TODO add this to the Requests
     static Authentication auth
     // (hostName, AuthTypeEnum.toAuthTypeEnumValue("application"), user, psk);
@@ -177,9 +179,9 @@ class HttpUrlConnectionRequestTest {
         // TODO chain this mofo
         var Map<String, String> args = connReq.arguments
         // get these things from the JSON in getBody
-        args.put("challenge", challenge)
+        args.put("challenge", preSessionAuth.challenge)
         args.put("response",
-        Cryptography.getChallengeResponse(password.bytes, challenge.bytes, salt.bytes))
+        Cryptography.getChallengeResponse(password.bytes, preSessionAuth.challenge.bytes, preSessionAuth.salt.bytes))
         connReq.execute(new Response() {
             override void onSuccess(RequestBase request) {
                 assertTrue(String.format("Connection succesful, response: %s", body), true)
@@ -223,12 +225,12 @@ class HttpUrlConnectionRequestTest {
         // TODO chain this mofo
         connReq.setCommand("user")
         connReq.setAction("viewme")
-        connReq.setSigningKey(psk + key)
+        connReq.setSigningKey(psk + session.key)
         // TODO chain this mofo
         var Map<String, String> params = connReq.parameters
         params.put("authentication_type", "application")
         params.put("application", "APPLICATION")
-        params.put("session", sessionId)
+        params.put("session", session.id)
         connReq.execute(new Response() {
             override void onSuccess(RequestBase request) {
                 assertTrue(String.format("Connection succesful, response: %s", body), true)
