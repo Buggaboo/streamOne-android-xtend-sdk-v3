@@ -14,6 +14,7 @@ import nl.streamone.sdk.Session
 import org.xtendroid.parcel.AndroidParcelable
 import org.xtendroid.annotations.EnumProperty
 import org.eclipse.xtend.lib.annotations.Accessors
+import org.json.JSONObject
 
 /** 
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
@@ -56,7 +57,8 @@ class HttpUrlConnectionRequestTest {
         args.put("limit", "3")
         connReq.execute(new Response() {
             override void onSuccess(RequestBase request) {
-                assertTrue(String.format("Connection succesful, response: %s", body), true)
+                assertTrue(String.format("Connection succesful, response: %s", json), true)
+                appAuth = new ApplicationAuthentication(new JSONObject(json).getJSONObject("body").toString)
                 /**
              * {
              * "header": {
@@ -118,7 +120,8 @@ class HttpUrlConnectionRequestTest {
         args.put("userip", "127.0.0.2")
         connReq.execute(new Response() {
             override void onSuccess(RequestBase request) {
-                assertTrue(String.format("Connection succesful, response: %s", body), true)
+                assertTrue(String.format("Connection succesful, response: %s", json), true)
+                preSessionAuth = new PreAuthentication(new JSONObject(json).getJSONObject("body").toString)
                 /**
              * {
              * "header": {
@@ -178,13 +181,14 @@ class HttpUrlConnectionRequestTest {
         params.put("application", "APPLICATION")
         // TODO chain this mofo
         var Map<String, String> args = connReq.arguments
-        // get these things from the JSON in getBody
+        // get these things from the JSON in getJson
         args.put("challenge", preSessionAuth.challenge)
         args.put("response",
         Cryptography.getChallengeResponse(password.bytes, preSessionAuth.challenge.bytes, preSessionAuth.salt.bytes))
         connReq.execute(new Response() {
             override void onSuccess(RequestBase request) {
-                assertTrue(String.format("Connection succesful, response: %s", body), true)
+                assertTrue(String.format("Connection succesful, response: %s", json), true)
+                session = new Session(new JSONObject(json).getJSONObject("body").toString)
                 /**
              * {
              * "header": {
@@ -233,7 +237,7 @@ class HttpUrlConnectionRequestTest {
         params.put("session", session.id)
         connReq.execute(new Response() {
             override void onSuccess(RequestBase request) {
-                assertTrue(String.format("Connection succesful, response: %s", body), true)
+                assertTrue(String.format("Connection succesful, response: %s", json), true)
                 /**
              * {
              * "header": {

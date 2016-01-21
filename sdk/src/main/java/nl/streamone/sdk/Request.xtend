@@ -30,7 +30,7 @@ abstract class Response
     protected int code
 
     @Accessors
-    protected String body
+    protected String json
 
     // TODO deterimine that volley also supports this
     @Accessors
@@ -294,7 +294,7 @@ class HttpUrlConnectionRequest extends RequestBase
 
             if (!responseBody.isEmpty)
             {
-                response.body = responseBody
+                response.json = responseBody
             }
 
             response.headers = connection.headerFields
