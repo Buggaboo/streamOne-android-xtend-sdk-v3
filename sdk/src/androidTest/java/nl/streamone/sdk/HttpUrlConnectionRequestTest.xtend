@@ -11,16 +11,18 @@ import nl.streamone.sdk.Authentication
 import nl.streamone.sdk.ApplicationAuthentication
 import nl.streamone.sdk.PreSessionAuthentication
 import nl.streamone.sdk.Session
-import org.xtendroid.parcel.AndroidParcelable
-import org.xtendroid.annotations.EnumProperty
-import org.eclipse.xtend.lib.annotations.Accessors
 import org.json.JSONObject
+
+import android.support.test.runner.AndroidJUnit4
+import org.junit.runner.RunWith
 
 /** 
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  * TODO test timeouts (max. 15m)
  */
+@RunWith(AndroidJUnit4)
 class HttpUrlConnectionRequestTest {
+
     final static String hostName = "localhost:6969"
     final static String user = "user"
     final static String psk = "AAAAABBBBBCCCCCDDDDD000000111111222222"
@@ -59,7 +61,7 @@ class HttpUrlConnectionRequestTest {
         connReq.execute(new Response() {
             override void onSuccess(RequestBase request) {
                 assertTrue(String.format("Connection succesful, response: %s", json), true)
-                appAuth = new ApplicationAuthentication(new JSONObject(json).getJSONObject("body").toString)
+                appAuth = new ApplicationAuthentication(new JSONObject(json).getJSONObject("body"))
                 /**
              * {
              * "header": {
@@ -122,7 +124,7 @@ class HttpUrlConnectionRequestTest {
         connReq.execute(new Response() {
             override void onSuccess(RequestBase request) {
                 assertTrue(String.format("Connection succesful, response: %s", json), true)
-                preSessionAuth = new PreAuthentication(new JSONObject(json).getJSONObject("body").toString)
+                preSessionAuth = new PreSessionAuthentication(new JSONObject(json).getJSONObject("body"))
                 /**
              * {
              * "header": {
@@ -189,7 +191,7 @@ class HttpUrlConnectionRequestTest {
         connReq.execute(new Response() {
             override void onSuccess(RequestBase request) {
                 assertTrue(String.format("Connection succesful, response: %s", json), true)
-                session = new Session(new JSONObject(json).getJSONObject("body").toString)
+                session = new Session(new JSONObject(json).getJSONObject("body"))
                 /**
              * {
              * "header": {

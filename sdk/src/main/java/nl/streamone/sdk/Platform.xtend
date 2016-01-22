@@ -9,7 +9,6 @@ import android.util.Base64
 import org.xtendroid.parcel.AndroidParcelable
 import org.xtendroid.json.AndroidJson
 import org.xtendroid.annotations.EnumProperty
-import org.eclipse.xtend.lib.annotations.Accessors
 
 /**
  * Created by jasmsison on 15/01/16.
