@@ -2,9 +2,8 @@ package nl.streamone.sdk
 
 import java.util.Map
 import org.junit.Test
-import org.junit.After
+import org.junit.AfterClass
 import org.junit.Before
-import java.util.regex.Pattern
 import static org.junit.Assert.*
 import nl.streamone.sdk.Cryptography
 import nl.streamone.sdk.Authentication
@@ -27,8 +26,8 @@ import com.squareup.okhttp.mockwebserver.RecordedRequest
  */
 @RunWith(AndroidJUnit4)
 class HttpUrlConnectionRequestTest {
-    var MockWebServer mServer
-    var Dispatcher mDispatcher
+    static var MockWebServer mServer
+    static var Dispatcher mDispatcher
 
     final static String user = "user"
     final static String psk = "AAAAABBBBBCCCCCDDDDD000000111111222222"
@@ -42,8 +41,15 @@ class HttpUrlConnectionRequestTest {
     PreSessionAuthentication preSessionAuth
     Session session
 
+    // run exactly once
     @Before
-    def setUp() {
+    def initializeMockWebServer() {
+        if (mServer != null)
+        {
+            // GTFO, if the server has been initialized
+            return;
+        }
+
         mServer = new MockWebServer
         mDispatcher = [ RecordedRequest request |
             val path = request.path
@@ -67,17 +73,20 @@ class HttpUrlConnectionRequestTest {
             return new MockResponse().responseCode = 404
         ]
         mServer.start
-
+/*
+        // the tests can be run separately
         openApplicationSession
         initializeUserSession
         createUserSession
+*/
     }
 
-    @After
-    def tearDown() {
-        mServer.shutdown
+    @AfterClass
+    static def shutdownMockWebServer() {
+        mServer?.shutdown
     }
 
+    @Test
     def void openApplicationSession() {
 
         /**
@@ -105,28 +114,6 @@ class HttpUrlConnectionRequestTest {
             override void onSuccess(RequestBase request) {
                 assertTrue(String.format("Connection succesful, response: %s", json), true)
                 appAuth = new ApplicationAuthentication(new JSONObject(json).getJSONObject("body"))
-                /**
-             * {
-             * "header": {
-             * "status": 0,
-             * "statusmessage": "OK",
-             * "apiversion": 3,
-             * "cacheable": true,
-             * "count": 1,
-             * "timezone": "Europe/Amsterdam"
-             * },
-             * "body": [{
-             * "id": "APPLICATION",
-             * "name": "Application Title",
-             * "description": "Application Description",
-             * "datecreated": "2015-09-28 09:00:02",
-             * "datemodified": "2015-09-28 09:00:02",
-             * "active": true,
-             * "iplock": null,
-             * "timezone": "Europe/Amsterdam"
-             * }]
-             * }
-             */
             }
 
             override void onError(RequestBase request) {
@@ -142,6 +129,7 @@ class HttpUrlConnectionRequestTest {
     /** 
      * The difference between this one and the one above is the
      */
+    @Test
     def void initializeUserSession() {
         /** 
          * 2. http://api.nicky.test/api/session/initialize?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=4fefaf20807f55839425fe217507a30cc4d3dea9
@@ -168,22 +156,6 @@ class HttpUrlConnectionRequestTest {
             override void onSuccess(RequestBase request) {
                 assertTrue(String.format("Connection succesful, response: %s", json), true)
                 preSessionAuth = new PreSessionAuthentication(new JSONObject(json).getJSONObject("body"))
-                /**
-             * {
-             * "header": {
-             * "status": 0,
-             * "statusmessage": "OK",
-             * "apiversion": 3,
-             * "cacheable": false,
-             * "timezone": "Europe/Amsterdam"
-             * },
-             * "body": {
-             * "challenge": "coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6",
-             * "salt": "$2y$12$baztaaydu13s4ah6y6pegt",
-             * "needsv2hash": false
-             * }
-             * }
-             */
             }
 
             override void onError(RequestBase request) {
@@ -207,6 +179,7 @@ class HttpUrlConnectionRequestTest {
      * }
      * $password_hash --> "The new password hash for this user, should be calculated as sha56(blowfish(md5(password), salt)), where password is the new password of the user"
      */
+    @Test
     def void createUserSession() {
         /** 
          * 3. http://api.nicky.test/api/session/create?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=b4cddd93cdb0e46fe8e992d578bc60f82fb3c95e
@@ -235,23 +208,6 @@ class HttpUrlConnectionRequestTest {
             override void onSuccess(RequestBase request) {
                 assertTrue(String.format("Connection succesful, response: %s", json), true)
                 session = new Session(new JSONObject(json).getJSONObject("body"))
-                /**
-             * {
-             * "header": {
-             * "status": 0,
-             * "statusmessage": "OK",
-             * "apiversion": 3,
-             * "cacheable": false,
-             * "timezone": "Europe/Amsterdam"
-             * },
-             * "body": {
-             * "id": "sC5tGogRgBow",
-             * "key": "gR92jURda7mEqiDzhcz2bC1FtIzS8wxe",
-             * "timeout": 3600,
-             * "user": "USER"
-             * }
-             * }
-             */
             }
 
             override void onError(RequestBase request) {
