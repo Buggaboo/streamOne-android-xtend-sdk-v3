@@ -131,7 +131,8 @@ class HttpUrlConnectionRequest extends RequestBase
     }
 
     new (String hostname) {
-        super()
+        this()
+        this.hostname = hostname
     }
 
     public override execute(Response response)
