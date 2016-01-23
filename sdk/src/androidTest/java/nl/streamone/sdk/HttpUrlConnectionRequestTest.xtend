@@ -48,13 +48,13 @@ class HttpUrlConnectionRequestTest {
         mDispatcher = [ RecordedRequest request |
             val path = request.path
             if (path.startsWith("api/application/view")){
-                return new MockResponse().setResponseCode(200).body = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":true,\"count\":1,\"timezone\":\"Europe\/Amsterdam\"},\"body\":[{\"id\":\"APPLICATION\",\"name\":\"Application Title\",\"description\":\"Application Description\",\"datecreated\":\"2015-09-28 09:00:02\",\"datemodified\":\"2015-09-28 09:00:02\",\"active\":true,\"iplock\":null,\"timezone\":\"Europe\/Amsterdam\"}]}"
+                return new MockResponse().setResponseCode(200).body = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":true,\"count\":1,\"timezone\":\"Europe/Amsterdam\"},\"body\":[{\"id\":\"APPLICATION\",\"name\":\"Application Title\",\"description\":\"Application Description\",\"datecreated\":\"2015-09-28 09:00:02\",\"datemodified\":\"2015-09-28 09:00:02\",\"active\":true,\"iplock\":null,\"timezone\":\"Europe/Amsterdam\"}]}"
             }
             if (path.startsWith("api/session/initialize")){
-                return new MockResponse().setResponseCode(200).body = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":false,\"timezone\":\"Europe\/Amsterdam\"},\"body\":{\"challenge\":\"coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6\",\"salt\":\"$2y$12$baztaaydu13s4ah6y6pegt\",\"needsv2hash\":false}}"
+                return new MockResponse().setResponseCode(200).body = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":false,\"timezone\":\"Europe/Amsterdam\"},\"body\":{\"challenge\":\"coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6\",\"salt\":\"$2y$12$baztaaydu13s4ah6y6pegt\",\"needsv2hash\":false}}"
             }
             if (path.startsWith("api/session/create")){
-                return new MockResponse().setResponseCode(200).body = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":false,\"timezone\":\"Europe\/Amsterdam\"},\"body\":{\"id\":\"sC5tGogRgBow\",\"key\":\"gR92jURda7mEqiDzhcz2bC1FtIzS8wxe\",\"timeout\":3600,\"user\":\"USER\"}}"
+                return new MockResponse().setResponseCode(200).body = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":false,\"timezone\":\"Europe/Amsterdam\"},\"body\":{\"id\":\"sC5tGogRgBow\",\"key\":\"gR92jURda7mEqiDzhcz2bC1FtIzS8wxe\",\"timeout\":3600,\"user\":\"USER\"}}"
 
             }
             // once we have the session id and the key, we can make arbitrary calls,
@@ -113,7 +113,7 @@ class HttpUrlConnectionRequestTest {
              * "apiversion": 3,
              * "cacheable": true,
              * "count": 1,
-             * "timezone": "Europe\/Amsterdam"
+             * "timezone": "Europe/Amsterdam"
              * },
              * "body": [{
              * "id": "APPLICATION",
@@ -123,7 +123,7 @@ class HttpUrlConnectionRequestTest {
              * "datemodified": "2015-09-28 09:00:02",
              * "active": true,
              * "iplock": null,
-             * "timezone": "Europe\/Amsterdam"
+             * "timezone": "Europe/Amsterdam"
              * }]
              * }
              */
@@ -175,7 +175,7 @@ class HttpUrlConnectionRequestTest {
              * "statusmessage": "OK",
              * "apiversion": 3,
              * "cacheable": false,
-             * "timezone": "Europe\/Amsterdam"
+             * "timezone": "Europe/Amsterdam"
              * },
              * "body": {
              * "challenge": "coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6",
@@ -242,7 +242,7 @@ class HttpUrlConnectionRequestTest {
              * "statusmessage": "OK",
              * "apiversion": 3,
              * "cacheable": false,
-             * "timezone": "Europe\/Amsterdam"
+             * "timezone": "Europe/Amsterdam"
              * },
              * "body": {
              * "id": "sC5tGogRgBow",
@@ -293,7 +293,7 @@ class HttpUrlConnectionRequestTest {
              * "apiversion": 3,
              * "cacheable": true,
              * "sessiontimeout": 3600,
-             * "timezone": "Europe\/Amsterdam"
+             * "timezone": "Europe/Amsterdam"
              * },
              * "body": {
              * "id": "USER",
@@ -303,7 +303,7 @@ class HttpUrlConnectionRequestTest {
              * "datemodified": "2016-01-15 09:24:41",
              * "email": "user@streamone.test",
              * "sessionsenabled": true,
-             * "timezone": "Europe\/Amsterdam",
+             * "timezone": "Europe/Amsterdam",
              * "mobilephone": "",
              * "address": "",
              * "zipcode": "",
