@@ -125,7 +125,6 @@ class Session {
     ResponseHeader header
 }
 
-
 class Cryptography
 {
     /**

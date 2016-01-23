@@ -81,83 +81,27 @@ abstract class RequestBase
     protected boolean useCaches = false
 
     /**
-    public String getSignature()
-    {
-     protected function signature()                                                                                 │fatal: Could not read from remote repository.
-     {                                                                                                              │
-     $parameters = $this->parametersForSigning()
-     $path = $this->path()                                                                                 │and the repository exists.
-     $arguments = $this->arguments()                                                                       │128 (M=2c5aa)
-     │Counting objects: 19, done.
-     // Calculate signature                                                                                 │Delta compression using up to 8 threads.
-     $url = $path . '?' . http_build_query($parameters) . '&' . http_build_query($arguments)               │Compressing objects: 100% (11/11), done.
-     $key = $this->signingKey()                                                                            │Writing objects: 100% (19/19), 3.67 KiB | 0 bytes/s, done.
-     │Total 19 (delta 5), reused 0 (delta 0)
-     return hash_hmac('sha1', $url, $key)                                                                  │To git@github.com:Buggaboo/streamOne-android-xtend-sdk-v3.git
-     }
-
-      protected function parametersForSigning()                                                                      │:100644 100644 eb88248... e5dc48b... M  sdk/src/main/java/nl/streamone/sdk/Request.xtend
-        {                                                                                                              │
-                $parameters = parent::parametersForSigning()                                                          │commit 2c5aaf55d2ae949cc374bcd6e40b4dae802e9d01
-
-                // Set actor ID parameter                                                                              │Date:   Mon Jan 18 15:50:14 2016 +0100
-                $actor_id = $this->config->getAuthenticationActorId()                                                 │
-                switch ($this->config->getAuthenticationType())                                                        │    Added unit test for user session creation
-                {                                                                                                      │
-                        case Config::AUTH_USER:                                                                        │:100644 100644 45aaeda... dd28b6f... M  .gitignore
-                                $parameters['user'] = $actor_id                                                       │:100644 100644 7966aa7... 7c79303... M  sdk/build.gradle
-                                break                                                                                 │:100644 100644 2444970... 7a4ec76... M  sdk/src/androidTest/java/nl/streamone/sdk/ApplicationTest.java
-                                                                                                                       │:000000 100644 0000000... b5ce4af... A  sdk/src/main/java/nl/streamone/sdk/Platform.xtend
-                        case Config::AUTH_APPLICATION:                                                                 │:100644 100644 3e17c04... eb88248... M  sdk/src/main/java/nl/streamone/sdk/Request.xtend
-                                $parameters['application'] = $actor_id                                                │
-                                break                                                                                 │commit c099c2b9e6038a4a8e8fa83d0fd37ac97940477e
-                }
-                                                                                                                       │Date:   Fri Jan 15 16:25:40 2016 +0100
-                return $parameters                                                                                    │
-        }
+    Do it like PHP
      */
-
-
-    /*
-    private String hmac(String psk, String input) throws
-    UnsupportedEncodingException, NoSuchAlgorithmException,
-    InvalidKeyException {
-
-        SecretKeySpec key = new SecretKeySpec((psk).getBytes("UTF-8"), "HmacSHA1")
-        Mac mac = Mac.getInstance("HmacSHA1")
-        mac.init(key)
-
-        byte[] bytes = mac.doFinal(input.getBytes("UTF-8"))
-
-        StringBuffer buffer = new StringBuffer()
-        for(int index = 0 index < bytes.length index++) {
-            buffer.append(Integer.toHexString(bytes[index]))
-        }
-
-        return buffer.toString()
-    }
-    */
-
-
-    static def String getHmacSha1(byte[] key, byte[] input) throws
+    static def String getHmacSha1(byte[] key, byte[] message) throws
         UnsupportedEncodingException, NoSuchAlgorithmException,
         InvalidKeyException
     {
-        val cryptoKey = new SecretKeySpec(key, "HmacSHA1")
+        val hmacSHA1Key = new SecretKeySpec(key, "HmacSHA1")
         val mac = Mac.getInstance("HmacSHA1")
-        mac.init(cryptoKey)
+        mac.init(hmacSHA1Key)
 
-        val encrypted = mac.doFinal(input)
+        val bytes = mac.doFinal(message)
 
-        // convert to hex (just like php expects)
-        val buffer = new StringBuffer
-        for(var index = 0; index < encrypted.length; index++) {
-        //for (var index : 0...bytes.length) {
-        // TODO is this legal syntax, KISS http://stackoverflow.com/questions/12126999/xtend-for-loop-support-and-adding-range-support
-            buffer.append(Integer.toHexString(encrypted.get(index)))
+        val StringBuffer hash = new StringBuffer
+        for (var i = 0; i < bytes.length; i++) {
+            val hex = Integer.toHexString(0xFF.bitwiseAnd(bytes.get(i)))
+            if (hex.length == 1) {
+                hash.append('0')
+            }
+            hash.append(hex)
         }
-
-        return buffer.toString
+        return hash.toString
     }
 
 
@@ -231,7 +175,7 @@ class HttpUrlConnectionRequest extends RequestBase
         val signaturePathAndQuery = concat(signaturePathAndQueryUrl.path, '?', signaturePathAndQueryUrl.query, args).toString
 
         try {
-            builder.appendQueryParameter("signature", getHmacSha1(signingKey.bytes, signaturePathAndQuery.bytes))
+            builder.appendQueryParameter("signature", getHmacSha1(signingKey.getBytes("UTF-8"), signaturePathAndQuery.getBytes("ASCII")))
         }catch(UnsupportedEncodingException e) {
             response.onLostConnection(this as RequestBase, e)
         }catch(NoSuchAlgorithmException e) {

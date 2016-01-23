@@ -19,6 +19,7 @@ import com.squareup.okhttp.mockwebserver.MockWebServer
 import com.squareup.okhttp.mockwebserver.Dispatcher
 import com.squareup.okhttp.mockwebserver.MockResponse
 import com.squareup.okhttp.mockwebserver.RecordedRequest
+import android.util.Log
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
@@ -26,6 +27,8 @@ import com.squareup.okhttp.mockwebserver.RecordedRequest
  */
 @RunWith(AndroidJUnit4)
 class HttpUrlConnectionRequestTest {
+    val TAG = "HttpUrlConnectionRequestTest"
+
     static var MockWebServer mServer
     static var Dispatcher mDispatcher
 
@@ -34,12 +37,16 @@ class HttpUrlConnectionRequestTest {
     final static String actorId = "user"
     final static String password = "password"
 
+    val applicationViewJsonRaw =   "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":true,\"count\":1,\"timezone\":\"Europe/Amsterdam\"},\"body\":[{\"id\":\"APPLICATION\",\"name\":\"Application Title\",\"description\":\"Application Description\",\"datecreated\":\"2015-09-28 09:00:02\",\"datemodified\":\"2015-09-28 09:00:02\",\"active\":true,\"iplock\":null,\"timezone\":\"Europe/Amsterdam\"}]}"
+    val sessionInitializeJsonRaw = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":false,\"timezone\":\"Europe/Amsterdam\"},\"body\":{\"challenge\":\"coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6\",\"salt\":\"$2y$12$baztaaydu13s4ah6y6pegt\",\"needsv2hash\":false}}"
+    val sessionCreateJsonRaw =     "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":false,\"timezone\":\"Europe/Amsterdam\"},\"body\":{\"id\":\"sC5tGogRgBow\",\"key\":\"gR92jURda7mEqiDzhcz2bC1FtIzS8wxe\",\"timeout\":3600,\"user\":\"USER\"}}"
+
     // TODO add this to the Requests
     Authentication auth
-    // (hostName, AuthTypeEnum.toAuthTypeEnumValue("application"), user, psk);
-    ApplicationAuthentication appAuth
-    PreSessionAuthentication preSessionAuth
-    Session session
+    // (hostName, AuthTypeEnum.toAuthTypeEnumValue("application"), user, psk)
+    ApplicationAuthentication appAuth = new ApplicationAuthentication(new JSONObject(applicationViewJsonRaw).getJSONArray("body").get(0) as JSONObject)
+    PreSessionAuthentication preSessionAuth = new PreSessionAuthentication(new JSONObject(sessionInitializeJsonRaw).getJSONObject("body"))
+    Session session = new Session(new JSONObject(sessionCreateJsonRaw).getJSONObject("body"))
 
     // run exactly once
     @Before
@@ -51,16 +58,21 @@ class HttpUrlConnectionRequestTest {
         }
 
         mServer = new MockWebServer
+        Log.d(TAG, "hostName: " + mServer.hostName)
+
         mDispatcher = [ RecordedRequest request |
             val path = request.path
-            if (path.startsWith("api/application/view")){
-                return new MockResponse().setResponseCode(200).body = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":true,\"count\":1,\"timezone\":\"Europe/Amsterdam\"},\"body\":[{\"id\":\"APPLICATION\",\"name\":\"Application Title\",\"description\":\"Application Description\",\"datecreated\":\"2015-09-28 09:00:02\",\"datemodified\":\"2015-09-28 09:00:02\",\"active\":true,\"iplock\":null,\"timezone\":\"Europe/Amsterdam\"}]}"
+
+            Log.d(TAG, "path: " + path)
+
+            if (path.contains("api/application/view")){
+                return new MockResponse().setResponseCode(200).body = applicationViewJsonRaw
             }
-            if (path.startsWith("api/session/initialize")){
-                return new MockResponse().setResponseCode(200).body = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":false,\"timezone\":\"Europe/Amsterdam\"},\"body\":{\"challenge\":\"coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6\",\"salt\":\"$2y$12$baztaaydu13s4ah6y6pegt\",\"needsv2hash\":false}}"
+            if (path.contains("api/session/initialize")){
+                return new MockResponse().setResponseCode(200).body = sessionInitializeJsonRaw
             }
-            if (path.startsWith("api/session/create")){
-                return new MockResponse().setResponseCode(200).body = "{\"header\":{\"status\":0,\"statusmessage\":\"OK\",\"apiversion\":3,\"cacheable\":false,\"timezone\":\"Europe/Amsterdam\"},\"body\":{\"id\":\"sC5tGogRgBow\",\"key\":\"gR92jURda7mEqiDzhcz2bC1FtIzS8wxe\",\"timeout\":3600,\"user\":\"USER\"}}"
+            if (path.contains("api/session/create")){
+                return new MockResponse().setResponseCode(200).body = sessionCreateJsonRaw
 
             }
             // once we have the session id and the key, we can make arbitrary calls,
@@ -72,7 +84,13 @@ class HttpUrlConnectionRequestTest {
 */
             return new MockResponse().responseCode = 404
         ]
-        mServer.start
+
+        try {
+            mServer.start
+        } catch(IllegalStateException e)
+        {
+            // move along...
+        }
 /*
         // the tests can be run separately
         openApplicationSession
@@ -85,7 +103,16 @@ class HttpUrlConnectionRequestTest {
     static def shutdownMockWebServer() {
         mServer?.shutdown
     }
-
+/*
+    // I think I got it right, TODO
+    @Test
+    def test_HmacSha1_same_as_php()
+    {
+        val byte[] key     = "aaaa".bytes
+        val byte[] message = "bbbb".bytes
+        assertEquals(RequestBase.getHmacSha1(key, message), "something")
+    }
+*/
     @Test
     def void openApplicationSession() {
 
@@ -121,17 +148,17 @@ class HttpUrlConnectionRequestTest {
             }
 
             override void onLostConnection(RequestBase request, Exception e) {
-                fail()
+                fail(e.message)
             }
         })
     }
 
-    /** 
+    /**
      * The difference between this one and the one above is the
      */
     @Test
     def void initializeUserSession() {
-        /** 
+        /**
          * 2. http://api.nicky.test/api/session/initialize?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=4fefaf20807f55839425fe217507a30cc4d3dea9
          * POST /api/session/initialize?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=4fefaf20807f55839425fe217507a30cc4d3dea9 HTTP/1.0
          * Host: api.nicky.test
@@ -163,25 +190,25 @@ class HttpUrlConnectionRequestTest {
             }
 
             override void onLostConnection(RequestBase request, Exception e) {
-                fail()
+                fail(e.message)
             }
         })
     }
 
-    /** 
+    /**
      * How to get the response:
      * public static function generatePasswordResponse($password, $salt, $challenge)
      * {
-     * $password_hash = crypt(md5($password), $salt);
-     * $sha_password_hash = hash('sha256', $password_hash);
-     * $password_hash_with_challenge = hash('sha256', $sha_password_hash . $challenge);
-     * return base64_encode($password_hash_with_challenge ^ $password_hash);
+     * $password_hash = crypt(md5($password), $salt)
+     * $sha_password_hash = hash('sha256', $password_hash)
+     * $password_hash_with_challenge = hash('sha256', $sha_password_hash . $challenge)
+     * return base64_encode($password_hash_with_challenge ^ $password_hash)
      * }
      * $password_hash --> "The new password hash for this user, should be calculated as sha56(blowfish(md5(password), salt)), where password is the new password of the user"
      */
     @Test
     def void createUserSession() {
-        /** 
+        /**
          * 3. http://api.nicky.test/api/session/create?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=b4cddd93cdb0e46fe8e992d578bc60f82fb3c95e
          * POST /api/session/create?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=b4cddd93cdb0e46fe8e992d578bc60f82fb3c95e HTTP/1.0
          * Host: api.nicky.test
@@ -215,14 +242,14 @@ class HttpUrlConnectionRequestTest {
             }
 
             override void onLostConnection(RequestBase request, Exception e) {
-                fail()
+                fail(e.message)
             }
         })
     }
 
     @Test
     def void viewUser() {
-        /** 
+        /**
          * 4. http://api.nicky.test/api/user/viewme?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&session=sC5tGogRgBow&signature=0760294b553bae59d798b2df03e66082b6699506
          * POST /api/user/viewme?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&session=sC5tGogRgBow&signature=0760294b553bae59d798b2df03e66082b6699506 HTTP/1.0
          * Host: api.nicky.test
@@ -276,7 +303,7 @@ class HttpUrlConnectionRequestTest {
             }
 
             override void onLostConnection(RequestBase request, Exception e) {
-                fail()
+                fail(e.message)
             }
         })
     } // TODO unit test Customer session (i.e. replace 'user' with 'customer'
