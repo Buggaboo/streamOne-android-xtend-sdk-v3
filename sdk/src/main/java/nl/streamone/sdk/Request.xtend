@@ -38,14 +38,7 @@ abstract class Response
     protected Map<String, List<String>> headers
 
     def void onSuccess(RequestBase request)
-    def void onError(RequestBase request)
-
-    def void onLostConnection(RequestBase request, Exception e)
-    // TODO support these
-    /*
-    def void connectionTimeout(RequestBase request, Exception e) // code == HTTP_CLIENT_TIMEOUT ?
-    def void readTimeout(RequestBase request, Exception e) // ...
-    */
+    def void onError(RequestBase request, Exception e)
 }
 
 abstract class RequestBase
@@ -184,11 +177,11 @@ class HttpUrlConnectionRequest extends RequestBase
         try {
             builder.appendQueryParameter("signature", getHmacSha1(signingKey.getBytes("UTF-8"), signaturePathAndQuery.getBytes("ASCII")))
         }catch(UnsupportedEncodingException e) {
-            response.onLostConnection(this as RequestBase, e)
+            response.onError(this as RequestBase, e)
         }catch(NoSuchAlgorithmException e) {
-            response.onLostConnection(this as RequestBase, e)
+            response.onError(this as RequestBase, e)
         }catch(InvalidKeyException e) {
-            response.onLostConnection(this as RequestBase, e)
+            response.onError(this as RequestBase, e)
         }
 
         val url = new URL(builder.build.toString)
@@ -200,13 +193,13 @@ class HttpUrlConnectionRequest extends RequestBase
         try {
             connection = url.openConnection as HttpURLConnection
         } catch(java.io.IOException e) {
-            response.onLostConnection(this as RequestBase, e)
+            response.onError(this as RequestBase, e)
         }
 
         try {
             connection.requestMethod = method
         } catch(java.net.ProtocolException e) {
-            response.onLostConnection(this as RequestBase, e)
+            response.onError(this as RequestBase, e)
         }
 
         connection.doInput = true
@@ -263,10 +256,10 @@ class HttpUrlConnectionRequest extends RequestBase
                 response.onSuccess(this as RequestBase)
             } else {
                 // handle error code
-                response.onError(this as RequestBase)
+                response.onError(this as RequestBase, null)
             }
         } catch(java.io.IOException e) {
-            response.onLostConnection(this as RequestBase, e)
+            response.onError(this as RequestBase, e)
         }
 
         if (connection != null && closeConnectionAfterUse) {

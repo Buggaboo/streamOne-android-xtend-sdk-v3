@@ -121,12 +121,8 @@ class HttpUrlConnectionRequestTest {
                 appAuth = new ApplicationAuthentication(new JSONObject(json).getJSONObject("body"))
             }
 
-            override void onError(RequestBase request) {
-                fail()
-            }
-
-            override void onLostConnection(RequestBase request, Exception e) {
-                fail(e.message)
+            override void onError(RequestBase request, Exception e) {
+                fail(e?.message)
             }
         })
     }
@@ -163,12 +159,8 @@ class HttpUrlConnectionRequestTest {
                 preSessionAuth = new PreSessionAuthentication(new JSONObject(json).getJSONObject("body"))
             }
 
-            override void onError(RequestBase request) {
-                fail()
-            }
-
-            override void onLostConnection(RequestBase request, Exception e) {
-                fail(e.message)
+            override void onError(RequestBase request, Exception e) {
+                fail(e?.message)
             }
         })
     }
@@ -215,12 +207,8 @@ class HttpUrlConnectionRequestTest {
                 session = new Session(new JSONObject(json).getJSONObject("body"))
             }
 
-            override void onError(RequestBase request) {
-                fail()
-            }
-
-            override void onLostConnection(RequestBase request, Exception e) {
-                fail(e.message)
+            override void onError(RequestBase request, Exception e) {
+                fail(e?.message)
             }
         })
     }
@@ -276,12 +264,8 @@ class HttpUrlConnectionRequestTest {
              */
             }
 
-            override void onError(RequestBase request) {
-                fail()
-            }
-
-            override void onLostConnection(RequestBase request, Exception e) {
-                fail(e.message)
+            override void onError(RequestBase request, Exception e) {
+                fail(e?.message)
             }
         })
     } // TODO unit test Customer session (i.e. replace 'user' with 'customer'
