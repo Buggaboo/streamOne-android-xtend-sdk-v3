@@ -1,5 +1,6 @@
 package nl.streamone.sdk
 
+import android.util.Log
 import android.net.Uri
 import static android.text.TextUtils.*
 
@@ -123,6 +124,8 @@ abstract class RequestBase
 
 class HttpUrlConnectionRequest extends RequestBase
 {
+    val TAG = "HttpUrlConnectionRequest"
+
     @Accessors
     String hostname
 
@@ -162,6 +165,9 @@ class HttpUrlConnectionRequest extends RequestBase
         // the PHP version has a very convoluted way of doing this
         val signaturePathAndQueryUrl = new URL(builder.build.toString)
 
+        // TODO remove log
+        Log.d(TAG, signaturePathAndQueryUrl.toString)
+
         val argBuilder = new StringBuilder
         if (!arguments.isEmpty)
         {
@@ -186,6 +192,10 @@ class HttpUrlConnectionRequest extends RequestBase
         }
 
         val url = new URL(builder.build.toString)
+
+        // TODO remove log
+        Log.d(TAG, url.toString)
+
         var HttpURLConnection connection = null
         try {
             connection = url.openConnection as HttpURLConnection
