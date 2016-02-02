@@ -22,16 +22,21 @@ import com.squareup.okhttp.mockwebserver.MockWebServer
 import com.squareup.okhttp.mockwebserver.Dispatcher
 import com.squareup.okhttp.mockwebserver.MockResponse
 import com.squareup.okhttp.mockwebserver.RecordedRequest
+import android.test.suitebuilder.annotation.MediumTest
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  * TODO test timeouts (max. 15m)
  */
 @RunWith(AndroidJUnit4)
+@MediumTest
 class HttpUrlConnectionRequestTest {
     static val TAG = "HttpUrlConnectionRequestTest"
 
     @Rule public var MockWebServer mServer = new MockWebServer
+
+    final static String hostName = 'localhost'
+    final static int    port     = 6969
 
     final static String user = "user"
     final static String psk = "AAAAABBBBBCCCCCDDDDD000000111111222222"
@@ -51,12 +56,9 @@ class HttpUrlConnectionRequestTest {
 
     // run exactly once
     @Before
-    def void initializeMockWebServer() {
-
-        val Dispatcher dispatcher = [ RecordedRequest request |
+    public def void initializeMockWebServer() {
+        mServer.dispatcher = [ RecordedRequest request |
             val path = request.path
-
-            Log.d(TAG, "path: " + path)
 
             if (path.contains("api/application/view")){
                 return new MockResponse().setResponseCode(200).body = applicationViewJsonRaw
@@ -73,11 +75,10 @@ class HttpUrlConnectionRequestTest {
             return new MockResponse().responseCode = 404
         ]
 
-        mServer.dispatcher = dispatcher
         mServer.useHttps(null, false)
 
         try {
-            mServer.start(1337)
+            mServer.start(port)
         } catch(IllegalStateException e) {
             // walk on... nothing to see here
         }
@@ -94,7 +95,7 @@ class HttpUrlConnectionRequestTest {
     }
 */
     @Test
-    def void openApplicationSession() {
+    public def void openApplicationSession() {
 
         /**
          * 1. http://api.nicky.test/api/application/view?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=fdcb6fa43769bc7729e4e6df1ed0cb99ffcd8572
@@ -104,8 +105,9 @@ class HttpUrlConnectionRequestTest {
          * Content-Type: application/x-www-form-urlencoded
          * application=APPLICATION&limit=3
          */
-        var HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(mServer.hostName)
+        var HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest('localhost', port)
         // TODO chain this mofo
+        connReq.scheme = 'http'
         connReq.setCommand("application")
         connReq.setAction("view")
         connReq.setSigningKey(psk)
@@ -133,7 +135,7 @@ class HttpUrlConnectionRequestTest {
      * The difference between this one and the one above is the
      */
     @Test
-    def void initializeUserSession() {
+    public def void initializeUserSession() {
         /**
          * 2. http://api.nicky.test/api/session/initialize?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=4fefaf20807f55839425fe217507a30cc4d3dea9
          * POST /api/session/initialize?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=4fefaf20807f55839425fe217507a30cc4d3dea9 HTTP/1.0
@@ -142,8 +144,9 @@ class HttpUrlConnectionRequestTest {
          * Content-Type: application/x-www-form-urlencoded
          * user=user&userip=127.0.0.2
          */
-        var HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(mServer.hostName)
+        var HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest('localhost', port)
         // TODO chain this mofo
+        connReq.scheme = 'http'
         connReq.setCommand("session")
         connReq.setAction("initialize")
         connReq.setSigningKey(psk)
@@ -179,7 +182,7 @@ class HttpUrlConnectionRequestTest {
      * $password_hash --> "The new password hash for this user, should be calculated as sha56(blowfish(md5(password), salt)), where password is the new password of the user"
      */
     @Test
-    def void createUserSession() {
+    public def void createUserSession() {
         /**
          * 3. http://api.nicky.test/api/session/create?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=b4cddd93cdb0e46fe8e992d578bc60f82fb3c95e
          * POST /api/session/create?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&signature=b4cddd93cdb0e46fe8e992d578bc60f82fb3c95e HTTP/1.0
@@ -188,8 +191,9 @@ class HttpUrlConnectionRequestTest {
          * Content-Type: application/x-www-form-urlencoded
          * challenge=coRUuWCVY3pqiEt69i9IaU8d9E0Q4zz6&response=HQtJEAcGEwAASEJTUx0GRQYKRAACUQ8YD0BdXlVZVC90TBwgdhBlLm9RA1R5N0AFW25wUVMNHHpeY1QD
          */
-        var HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(mServer.hostName)
+        var HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest('localhost', port)
         // TODO chain this mofo
+        connReq.scheme = 'http'
         connReq.setCommand("session")
         connReq.setAction("create")
         connReq.setSigningKey(psk)
@@ -216,15 +220,16 @@ class HttpUrlConnectionRequestTest {
     }
 
     @Test
-    def void viewUser() {
+    public def void viewUser() {
         /**
          * 4. http://api.nicky.test/api/user/viewme?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&session=sC5tGogRgBow&signature=0760294b553bae59d798b2df03e66082b6699506
          * POST /api/user/viewme?api=3&format=json&authentication_type=application&timestamp=1452846289&application=APPLICATION&session=sC5tGogRgBow&signature=0760294b553bae59d798b2df03e66082b6699506 HTTP/1.0
          * Host: api.nicky.test
          * Content-Type: application/x-www-form-urlencoded
          */
-        var HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest(mServer.hostName)
+        var HttpUrlConnectionRequest connReq = new HttpUrlConnectionRequest('localhost', port)
         // TODO chain this mofo
+        connReq.scheme = 'http'
         connReq.setCommand("user")
         connReq.setAction("viewme")
         connReq.setSigningKey(psk + session.key)
@@ -271,10 +276,11 @@ class HttpUrlConnectionRequestTest {
             }
         })
     } // TODO unit test Customer session (i.e. replace 'user' with 'customer'
-
+/*
     @After
     def void shutdownMockWebServer() {
         mServer?.shutdown
     }
+*/
 
 }

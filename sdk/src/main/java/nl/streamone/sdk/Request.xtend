@@ -122,6 +122,9 @@ class HttpUrlConnectionRequest extends RequestBase
     @Accessors
     String hostname
 
+    @Accessors
+    String port
+
     new () {
         super()
     }
@@ -131,6 +134,12 @@ class HttpUrlConnectionRequest extends RequestBase
         this.hostname = hostname
     }
 
+    new (String hostname, int port)
+    {
+        this(hostname)
+        this.port =  Integer.toString(port)
+    }
+
     public override execute(Response response)
     {
         if (signingKey == null)
@@ -138,10 +147,8 @@ class HttpUrlConnectionRequest extends RequestBase
             throw new IllegalArgumentException("You must provide a signing key.")
         }
 
-        val builder = new Uri.Builder()
-        builder.scheme(scheme)
-        .authority(hostname) // authority = hostname
-        .appendPath('api')
+        val builder = Uri.parse(concat(scheme, '://', hostname , ':', port) as String).buildUpon
+        builder.appendPath('api')
         .appendPath(command)
         .appendPath(action)
 
